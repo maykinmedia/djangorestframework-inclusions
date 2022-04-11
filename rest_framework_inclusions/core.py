@@ -25,7 +25,9 @@ class InclusionLoader:
         result = {}
         for obj, inclusion_serializer in entries:
             model_key = obj.__class__._meta.label
-            data = inclusion_serializer(instance=obj).data
+            data = inclusion_serializer(
+                instance=obj, context={"request": serializer.context.get("request")}
+            ).data
             result.setdefault(model_key, []).append(data)
         # in-place sort of inclusions
         for value in result.values():
@@ -161,6 +163,8 @@ def sort_key(item):
         return item["id"]
     elif "pk" in item:
         return item["pk"]
+    elif "url" in item:
+        return item["url"]
     raise ValueError(
         "Item %r does not contain a reference to the 'id'. "
         " Please included it in the serializer." % item
